@@ -4,13 +4,13 @@ from streamlit_lottie import st_lottie
 import json
 
 
-def loadVideo(url):
-    r = requests.get(url)
-    if r.status_code != 200 :
-        return None
-    return r.json()
+def loadVideo(filepath: str):
+    with open(filepath, "r") as f: 
+        return json.load(f)
 
-lottie_url = loadVideo("https://app.lottiefiles.com/share/6d831349-4577-498f-aab9-ca1913426abe")
+
+lottie_url = loadVideo("lottiefiles/Targeting the Ads.json")
+
 
 
 with st.container():
