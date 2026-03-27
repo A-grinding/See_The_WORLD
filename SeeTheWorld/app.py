@@ -12,6 +12,8 @@ from r_visualizer import generatePlot
 from PIL import Image
 from dotenv import load_dotenv
 import os
+import praw
+from dotenv import load_dotenv
 
 
 
@@ -31,8 +33,38 @@ def loadVideo(filepath: str):
         return json.load(f)
 
 
-lottie_url = loadVideo("lottiefiles/Targeting the Ads.json")
+lottie_url = loadVideo("lottiefiles/Targeting_the_Ads.json")
 
+def fetch_reddit_posts(query):
+    url = f"https://www.reddit.com/search.json?q={query}&limit=15&sort=top&t=week"
+
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+    }
+
+    response = requests.get(url, headers=headers)
+    if response.status_code != 200:
+        print("Error:", response.status_code)
+        return []
+
+    try:
+        data = response.json()
+    except Exception:
+        print("Response is not JSON:", response.text[:200])
+        return []
+
+    posts = []
+
+    for item in data.get("data", {}).get("children", []):
+        post = item.get("data", {})
+
+        posts.append({
+            "user": post.get("author"),
+            "full_text": (post.get("title", "") + " " + post.get("selftext", "")),
+            "favourite_count": post.get("score"),
+            "retweet_count": post.get("num_comments")
+        })
+    return posts
 
 
 with st.container():
@@ -68,39 +100,34 @@ with st.container():
     qr = frm.text_input("Enter a word to see world's thought of it.....", key="query")
     btn = frm.form_submit_button("Go!")
     if btn:
-        with st.spinner("The World's so big and it takes time to see it all :sweat_smile:"):
-            run_input = {
-            "searchTerms": [qr],
-            "maxItems": 50,
-            "sort": "Top", # This gets the "Top" tweets based on engagement
-            "tweetLanguage": "en",
-            }
-            run = client.actor("apidojo/twitter-scraper-lite").call(run_input=run_input)
-            tweets = client.dataset(run["defaultDatasetId"]).iterate_items()
-            
-            if tweets: 
-                df = pd.DataFrame(tweets)
-                df.to_csv("tweets.csv", index = False)
-                for tweet in tweets:
-                    with st.chat_message("user", avatar=""):
-                        st.write(f"**@{tweet['user']}")
-                        st.write(tweet['full text'])
-                        st.caption(f"{tweet['favourite_count']} | {tweet['retweet_count']}")
-                with st.spinner("Analyzing the thoughts of the world :thinking_face:"):
-                    inferDoc(gclient, "tweets.csv", "analyzed_tweets.csv")
-                    analyzed_df = pd.read_csv("analyzed_tweets.csv")
-                st.success("Analysis Complete!")
-                with st.spinner("Generating Graphs and insights :bar_chart:"):
-                    generatePlot()
-                
-                img = Image.open("sentiment_analysis_plot.png")
-                st.image(img, captions = "Sentiment Analysis of Tweets")
-                
-                
-                         
-                        
+        with st.spinner("The World's so big and it takes time to see it all 😅"):
+
+            tweets = fetch_reddit_posts(qr)
+
+            if len(tweets) > 0:
+                try:
+                    df = pd.DataFrame(tweets)
+                    df.to_csv("tweets.csv", index=False)
+                    for tweet in tweets:
+                        with st.chat_message("user"):
+                            st.write(f"**u/{tweet['user']}**")
+                            st.write(tweet['full_text'])
+                            st.caption(f"⬆️ {tweet['favourite_count']} 💬 {tweet['retweet_count']}")
+
+                    with st.spinner("Analyzing the thoughts of the world 🤔"):
+                        inferDoc("tweets.csv", "analyzed_tweets.csv")
+
+                    st.success("Analysis Complete!")
+
+                    with st.spinner("Generating Graphs 📊"):
+                        generatePlot()
+
+                    img = Image.open("sentiment_distribution.png")
+                    st.image(img, caption="Sentiment Analysis of Posts")
+
+                except Exception as e:
+                    st.error(f"Error: {e}")
+                    st.write(tweets[0])
+
             else:
-                st.error("No tweets found. Try a different keyword!")
-            
-                
-            
+                st.error("No posts found. Try a different keyword!")

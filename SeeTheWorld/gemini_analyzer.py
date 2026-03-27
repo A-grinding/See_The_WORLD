@@ -1,47 +1,42 @@
-from google import genai
-from google.genai import types
-import json
+from textblob import TextBlob
+from collections import Counter
+import pandas as pd
+import re
+import nltk
+from nltk.corpus import stopwords
 
 
 
-def inferDoc(gclient, input, output):
-    print(f"Loading tweets")
-    
+def inferDoc(input, output):
+    stop_words = [ 'stop', 'the', 'to', 'and', 'a', 'in', 'it', 'is', 'I', 'that', 'had', 'on', 'for', 'were', 'was']
     df = pd.read_csv(input)
+    results = []
     
-    tweetsList = df['full text'].head(50).tolist()
-    
-    prompt = f"""
-    Analyze the following list of scraped tweets. 
-    1. Identify the 10 most important overall keywords/topics across this specific dataset.
-    2. For each of these 10 keywords, identify the sentiment (Positive, Negative, or Neutral).
-    
-    Return the result EXACTLY as a JSON array of objects with this structure:
-    [
-      {{"tweet": "exact tweet text", "primary_keyword": "keyword", "sentiment": "Positive/Negative/Neutral"}}
-    ]
-    
-    Here are the tweets:
-    {tweetsList}
-    """
-    
-    
-    response = gclient.models.generate_content(
-        model = "gemini-2.0-flash",
-        contents = prompt,
-        config = types.GenerateContentConfig(
-            response_mime_type= "application/json",
-            temperature=0.2,
-        )
-    )
-    try:    
-        data = json.loads(response.text)
-        results_df = pd.DataFrame(data)
+    for text in df['full_text']:
+        words = re.findall(r'\b\w+\b', str(text).lower())
+        filtered_words = [word for word in words if word not in stop_words and len(word)>2]
+        blob = TextBlob(str(text))
+        choice = blob.sentiment.polarity
         
-        results_df.to_csv(output, index=False)
-        print(f"Success! Analyzed data saved to {output}")
-    
-    except Exception as e:
-        print("Error parsing response as JSON:", e)
-        print("Raw response text:", response.text)
+        if choice > 0:
+            feeling = "Positive"
+        elif choice < 0: 
+            feeling = "Negative"
+        else:
+            feeling = "Neutral"
         
+        freq_word = Counter(filtered_words)
+        if freq_word:
+            keyword = freq_word.most_common(1)[0][0]
+        else:
+            keyword = ""
+            
+        results.append({
+            "tweet" : text,
+            "keyword" : keyword,
+            "intentions" : feeling
+        })
+        
+
+    results_df = pd.DataFrame(results)
+    results_df.to_csv(output, index=False)

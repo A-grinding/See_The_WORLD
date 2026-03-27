@@ -2,6 +2,15 @@ library(ggplot2)
 
 data <- read.csv("analyzed_tweets.csv")
 
-plot1 <- ggplot(data, aes(x = sentiment,)) + geom_bar() + ggtitle("Sentiment Analysis")
+png("sentiment_distribution.png", width=800, height=500)
 
-ggsave("sentiment_analysis_plot.png", plot = plot1)
+ggplot(data, aes(x = keyword, fill = intentions)) +
+  geom_bar(stat = "count") +
+  labs(
+    title = "Sentiment Distribution by Keyword",
+    x = "Keyword",
+    y = "Count"
+  ) +
+  theme_minimal()
+
+dev.off()
