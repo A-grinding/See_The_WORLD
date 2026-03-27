@@ -1,3 +1,0 @@
-Requests==2.33.0
-streamlit==1.55.0
-streamlit_lottie==0.0.5
