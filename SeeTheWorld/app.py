@@ -2,6 +2,28 @@ import streamlit as st
 import requests
 from streamlit_lottie import st_lottie
 import json
+from apify_client import ApifyClient
+import pandas as pd
+import time
+from google import genai
+from google.genai import types
+from gemini_analyzer import inferDoc
+from r_visualizer import generatePlot
+from PIL import Image
+from dotenv import load_dotenv
+import os
+
+
+
+
+
+load_dotenv()
+
+client = ApifyClient(os.getenv("APIFY_API_KEY"))
+
+gclient = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+
+
 
 
 def loadVideo(filepath: str):
@@ -45,3 +67,40 @@ with st.container():
     frm = st.form("user query")
     qr = frm.text_input("Enter a word to see world's thought of it.....", key="query")
     btn = frm.form_submit_button("Go!")
+    if btn:
+        with st.spinner("The World's so big and it takes time to see it all :sweat_smile:"):
+            run_input = {
+            "searchTerms": [qr],
+            "maxItems": 50,
+            "sort": "Top", # This gets the "Top" tweets based on engagement
+            "tweetLanguage": "en",
+            }
+            run = client.actor("apidojo/twitter-scraper-lite").call(run_input=run_input)
+            tweets = client.dataset(run["defaultDatasetId"]).iterate_items()
+            
+            if tweets: 
+                df = pd.DataFrame(tweets)
+                df.to_csv("tweets.csv", index = False)
+                for tweet in tweets:
+                    with st.chat_message("user", avatar=""):
+                        st.write(f"**@{tweet['user']}")
+                        st.write(tweet['full text'])
+                        st.caption(f"{tweet['favourite_count']} | {tweet['retweet_count']}")
+                with st.spinner("Analyzing the thoughts of the world :thinking_face:"):
+                    inferDoc(gclient, "tweets.csv", "analyzed_tweets.csv")
+                    analyzed_df = pd.read_csv("analyzed_tweets.csv")
+                st.success("Analysis Complete!")
+                with st.spinner("Generating Graphs and insights :bar_chart:"):
+                    generatePlot()
+                
+                img = Image.open("sentiment_analysis_plot.png")
+                st.image(img, captions = "Sentiment Analysis of Tweets")
+                
+                
+                         
+                        
+            else:
+                st.error("No tweets found. Try a different keyword!")
+            
+                
+            
