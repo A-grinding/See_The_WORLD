@@ -2,7 +2,6 @@ streamlit==1.32.0
 apify-client==2.5.0
 nltk==3.8.1
 pandas==2.1.4
-Pillow
 praw
 protobuf==3.20.3
 python-dotenv
@@ -11,4 +10,3 @@ numpy
 matplotlib
 textblob
 streamlit-lottie
-
