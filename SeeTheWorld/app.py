@@ -68,7 +68,7 @@ def fetch_reddit_posts(query):
 
 
 with st.container():
-    st.set_page_config(page_title= "See The WORLD", page_icon=":ringed_planet:", layout="wide")
+    st.set_page_config(page_title= "See The WORLD", page_icon="🌏", layout="wide")
 
     st.subheader("See The WORLD")
     st.title("The World is made by people and people are made of THOUGHTS")
