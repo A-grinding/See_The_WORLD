@@ -1,6 +1,6 @@
 import streamlit as st
 import requests
-from streamlit_lottie import st_lottie
+from streamlit-lottie import st_lottie
 import json
 from apify_client import ApifyClient
 import pandas as pd
