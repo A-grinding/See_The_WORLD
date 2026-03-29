@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 import os
 import praw
 from dotenv import load_dotenv
+from analyzer import inferDoc
 
 
 
