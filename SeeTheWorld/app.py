@@ -121,7 +121,7 @@ with st.container():
     if btn:
         with st.spinner("The World's so big and it takes time to see it all 😅"):
 
-            tweets = fetch_reddit_posts(qr)
+            tweets = fetch_reddit_posts(qr, client_id=st.secrets["reddit"]["client_id"],client_secret=st.secrets["reddit"]["client_secret"])
 
             if len(tweets) > 0:
                 try:
