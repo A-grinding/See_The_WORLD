@@ -37,7 +37,7 @@ def fetch_reddit_posts(query):
     url = f"https://www.reddit.com/search.json?q={query}&limit=15&sort=top&t=week"
 
     headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+        "User-Agent": "Mozilla/5.0 (compatible; MyApp/1.0)"
     }
 
     response = requests.get(url, headers=headers)
