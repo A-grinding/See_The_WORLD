@@ -34,7 +34,6 @@ def loadVideo(filepath: str):
 lottie_url = loadVideo("SeeTheWorld/lottiefiles/Targeting_the_Ads.json")
 
 def fetch_reddit_posts(query, client_id, client_secret):
-    # Step 1: Get token
     auth = requests.auth.HTTPBasicAuth(client_id, client_secret)
     res = requests.post(
         "https://www.reddit.com/api/v1/access_token",
@@ -42,49 +41,30 @@ def fetch_reddit_posts(query, client_id, client_secret):
         auth=auth,
         headers={"User-Agent": "python:see_the_world:v1.0 (by anonymous)"}
     )
-    
-    st.write("Token response status:", res.status_code)  # DEBUG
-    st.write("Token response:", res.json())               # DEBUG
-    
     token = res.json().get("access_token")
     if not token:
-        st.error("No token received!")
         return []
 
-    # Step 2: Search
     url = f"https://oauth.reddit.com/search?q={query}&limit=15&sort=top&t=week"
     headers = {
         "Authorization": f"bearer {token}",
         "User-Agent": "python:see_the_world:v1.0 (by anonymous)"
     }
     response = requests.get(url, headers=headers)
-    
-    st.write("Search status:", response.status_code)  # DEBUG
-    st.write("Raw response:", response.json())         # DEBUG
-
     if response.status_code != 200:
-        print("Error:", response.status_code)
         return []
 
-    try:
-        data = response.json()
-    except Exception:
-        print("Response is not JSON:", response.text[:200])
-        return []
-
+    data = response.json()
     posts = []
-
     for item in data.get("data", {}).get("children", []):
         post = item.get("data", {})
-
         posts.append({
             "user": post.get("author"),
-            "full_text": (post.get("title", "") + " " + post.get("selftext", "")),
+            "full_text": (post.get("title", "") + " " + post.get("selftext", "")).strip(),
             "favourite_count": post.get("score"),
             "retweet_count": post.get("num_comments")
         })
     return posts
-
 
 with st.container():
     st.set_page_config(page_title= "See The WORLD", page_icon="🌏", layout="wide")
