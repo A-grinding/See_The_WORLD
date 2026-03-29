@@ -7,6 +7,6 @@ protobuf
 python-dotenv
 requests
 pillow
-numpy<=1.25.1
+numpy>1.25.1
 textblob
 streamlit-lottie
