@@ -18,9 +18,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-client = ApifyClient(os.getenv("APIFY_API_KEY"))
 
-gclient = genai.Client(api_key=os.getenv("GEMINI_API_KEY"))
+
+
 
 
 
