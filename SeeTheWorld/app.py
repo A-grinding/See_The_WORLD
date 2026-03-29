@@ -5,9 +5,6 @@ import json
 from apify_client import ApifyClient
 import pandas as pd
 import time
-from google import genai
-from google.genai import types
-from gemini_analyzer import inferDoc
 from r_visualizer import generatePlot
 from PIL import Image
 from dotenv import load_dotenv
