@@ -31,7 +31,7 @@ def loadVideo(filepath: str):
         return json.load(f)
 
 
-lottie_url = loadVideo("lottiefiles/Targeting_the_Ads.json")
+lottie_url = loadVideo("/lottiefiles/Targeting_the_Ads.json")
 
 def fetch_reddit_posts(query):
     url = f"https://www.reddit.com/search.json?q={query}&limit=15&sort=top&t=week"
