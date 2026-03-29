@@ -33,20 +33,35 @@ def loadVideo(filepath: str):
 
 lottie_url = loadVideo("SeeTheWorld/lottiefiles/Targeting_the_Ads.json")
 
-def fetch_reddit_posts(query):
-    headers = {"User-Agent": "python:see_the_world:v1.0 (by anonymous)"}
+def fetch_reddit_posts(query, client_id, client_secret):
+    # Step 1: Get token
+    auth = requests.auth.HTTPBasicAuth(client_id, client_secret)
     res = requests.post(
         "https://www.reddit.com/api/v1/access_token",
-        data={"grant_type": "https://oauth.reddit.com/grants/installed_client",
-              "device_id": "DO_NOT_TRACK_THIS_DEVICE"},
-        auth=("", ""),  
-        headers=headers
+        data={"grant_type": "client_credentials"},
+        auth=auth,
+        headers={"User-Agent": "python:see_the_world:v1.0 (by anonymous)"}
     )
+    
+    st.write("Token response status:", res.status_code)  # DEBUG
+    st.write("Token response:", res.json())               # DEBUG
+    
     token = res.json().get("access_token")
-    url = f"https://oauth.reddit.com/search?q={query}&limit=15&sort=top&t=week"
-    headers["Authorization"] = f"bearer {token}"
+    if not token:
+        st.error("No token received!")
+        return []
 
-    response = requests.get(url, headers=headers)    
+    # Step 2: Search
+    url = f"https://oauth.reddit.com/search?q={query}&limit=15&sort=top&t=week"
+    headers = {
+        "Authorization": f"bearer {token}",
+        "User-Agent": "python:see_the_world:v1.0 (by anonymous)"
+    }
+    response = requests.get(url, headers=headers)
+    
+    st.write("Search status:", response.status_code)  # DEBUG
+    st.write("Raw response:", response.json())         # DEBUG
+
     if response.status_code != 200:
         print("Error:", response.status_code)
         return []
