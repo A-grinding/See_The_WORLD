@@ -1,7 +1,7 @@
-streamlit==1.32.0
+streamlit
 apify-client==2.5.0
 nltk==3.8.1
-pandas==2.1.4
+pandas
 praw
 protobuf==3.20.3
 python-dotenv
