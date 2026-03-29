@@ -34,10 +34,10 @@ def loadVideo(filepath: str):
 lottie_url = loadVideo("SeeTheWorld/lottiefiles/Targeting_the_Ads.json")
 
 def fetch_reddit_posts(query):
-    url = f"https://www.reddit.com/search.json?q={query}&limit=15&sort=top&t=week"
+    url = f"https://api.reddit.com/search?q={query}&limit=15&sort=top&t=week"
 
     headers = {
-        "User-Agent": "Mozilla/5.0 (compatible; MyApp/1.0)"
+        "User-Agent": "python:see_the_world:v1.0 (by anonymous)"
     }
 
     response = requests.get(url, headers=headers)
