@@ -34,13 +34,19 @@ def loadVideo(filepath: str):
 lottie_url = loadVideo("SeeTheWorld/lottiefiles/Targeting_the_Ads.json")
 
 def fetch_reddit_posts(query):
-    url = f"https://api.reddit.com/search?q={query}&limit=15&sort=top&t=week"
+    headers = {"User-Agent": "python:see_the_world:v1.0 (by anonymous)"}
+    res = requests.post(
+        "https://www.reddit.com/api/v1/access_token",
+        data={"grant_type": "https://oauth.reddit.com/grants/installed_client",
+              "device_id": "DO_NOT_TRACK_THIS_DEVICE"},
+        auth=("", ""),  
+        headers=headers
+    )
+    token = res.json().get("access_token")
+    url = f"https://oauth.reddit.com/search?q={query}&limit=15&sort=top&t=week"
+    headers["Authorization"] = f"bearer {token}"
 
-    headers = {
-        "User-Agent": "python:see_the_world:v1.0 (by anonymous)"
-    }
-
-    response = requests.get(url, headers=headers)
+    response = requests.get(url, headers=headers)    
     if response.status_code != 200:
         print("Error:", response.status_code)
         return []
