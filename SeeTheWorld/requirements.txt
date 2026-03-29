@@ -1,12 +1,12 @@
-streamlit
+streamlit==1.24.1
 apify-client==2.5.0
 nltk==3.8.1
-pandas
+pandas>2.0
 praw
 protobuf==3.20.3
 python-dotenv
 requests
 pillow==10.0.0
-numpy
+numpy<=1.25.1
 textblob
 streamlit-lottie
